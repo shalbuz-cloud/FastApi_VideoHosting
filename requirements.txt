@@ -1,3 +1,4 @@
+aiofiles==0.8.0
 aiosqlite==0.17.0
 anyio==3.6.1
 asgiref==3.5.2
@@ -9,6 +10,8 @@ greenlet==1.1.2
 h11==0.13.0
 httptools==0.4.0
 idna==3.3
+Jinja2==3.1.2
+MarkupSafe==2.1.1
 ormar==0.11.1
 pydantic==1.9.1
 python-dotenv==0.20.0
