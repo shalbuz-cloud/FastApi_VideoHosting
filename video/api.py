@@ -1,15 +1,16 @@
 from typing import List
 
-from fastapi import APIRouter, UploadFile, File, Form, BackgroundTasks
+from fastapi import APIRouter, UploadFile, File, Form, BackgroundTasks, Depends
 from fastapi.responses import StreamingResponse, HTMLResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.requests import Request
 
-from schemas import GetListVideo
-from models import Video, User
-from services import save_video, open_file
+from video.schemas import GetListVideo
+from video.models import Video, User
+from video.services import save_video, open_file
+from user.auth import current_active_user
 
-router = APIRouter()
+router = APIRouter(tags=['video'])
 templates = Jinja2Templates(directory='templates')
 
 
@@ -18,12 +19,11 @@ async def create_video(
         background_tasks: BackgroundTasks,  # Фоновая загрузка
         title: str = Form(...),
         description: str = Form(...),
-        file: UploadFile = File(...)
+        file: UploadFile = File(...),
+        user: User = Depends(current_active_user)
 ) -> Video:
-    user = await User.objects.first()  # TODO: Выбор пользователя БД
-    return await save_video(
-        user, file, title, description, background_tasks
-    )
+    """Add video"""
+    return await save_video(user, file, title, description, background_tasks)
 
 
 # @router.get('/video/{video_pk}')
@@ -34,7 +34,7 @@ async def create_video(
 
 
 @router.get('/user/{user_pk}', response_model=List[GetListVideo])
-async def get_list_video(user_pk: int) -> Video:
+async def get_list_video(user_pk: str) -> Video:
     video_list = await Video.objects.filter(user=user_pk).all()
     return video_list
 
