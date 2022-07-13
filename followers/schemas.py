@@ -4,9 +4,9 @@ from user.schemas import UserOut
 
 
 class FollowerCreate(BaseModel):
-    user: str
+    username: str
 
 
-class FollowerList(FollowerCreate):
+class FollowerList(BaseModel):
     user: UserOut
     subscriber: UserOut
