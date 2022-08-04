@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 
 from video.api import router as video_router
-from user.routers import router as user_router
+from user.api import router as user_router
 from followers.api import router as follower_router
 from db import database, metadata, engine
 

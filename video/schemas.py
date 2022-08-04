@@ -1,5 +1,7 @@
 from pydantic import BaseModel
 
+from user.schemas import UserOut
+
 
 class User(BaseModel):
     id: int
@@ -18,7 +20,7 @@ class GetListVideo(BaseModel):
 
 
 class GetVideo(GetListVideo):
-    user: User
+    user: UserOut
 
 
 class Message(BaseModel):

@@ -1,24 +1,45 @@
-from fastapi_users.authentication import JWTAuthentication
-from fastapi_users import FastAPIUsers
+import jwt
+from jwt import PyJWTError
+from fastapi import HTTPException, Security
+from fastapi.security import OAuth2PasswordBearer
+from starlette.status import HTTP_403_FORBIDDEN
 
-from user.models import user_db
-from user.schemas import User, UserDB, UserCreate, UserUpdate
+from .models import User
 
-SECRET = "Sdasdad3w#RmF34ef43%E5&*6DV%$5DSvBF*fY9V(y*&VNFdfBU(t8DnfDS"
+from .tokenizator import ALGORITHM, SECRET_KEY
+from .schemas import TokenPayload
 
-auth_backends = []
+reusable_oauth2 = OAuth2PasswordBearer(tokenUrl="/api/v1/login/access-token")
 
-jwt_authentication = JWTAuthentication(secret=SECRET, lifetime_seconds=3600)
 
-auth_backends.append(jwt_authentication)
+async def get_current_user(token: str = Security(reusable_oauth2)):
+    """ Check auth user
+    """
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        token_data = TokenPayload(**payload)
+    except PyJWTError:
+        raise HTTPException(
+            status_code=HTTP_403_FORBIDDEN,
+            detail="Could not validate credentials"
+        )
+    user = await User.objects.get_or_none(id=token_data.user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user
 
-fastapi_users = FastAPIUsers(
-    user_db,
-    auth_backends,
-    User,
-    UserCreate,
-    UserUpdate,
-    UserDB,
-)
 
-current_active_user = fastapi_users.current_user(active=True)
+async def get_user(current_user: User = Security(get_current_user)):
+    """ Проверка активный юзер или нет """
+    if not current_user.is_active:
+        raise HTTPException(status_code=400, detail="Inactive user")
+    return current_user
+
+
+async def get_superuser(current_user: User = Security(get_current_user)):
+    """ Проверка суперпользователь или нет """
+    if not current_user.is_superuser:
+        raise HTTPException(
+            status_code=400, detail="The user doesn't have enough privileges"
+        )
+    return current_user

@@ -9,7 +9,6 @@ Deprecated==1.2.11
 dnspython==2.1.0
 email-validator==1.1.2
 fastapi==0.68.2
-fastapi-users==7.0.0
 fastapi-users-db-ormar==1.0.0
 filetype==1.0.7
 greenlet==1.1.2
